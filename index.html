@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <title>Document</title>
+</head>
+<body>
+    <h1 class="text-center">The Node & Mongo is running ... YAY</h1>
+    <p class="text-center" id="userName"></p>
+    <div class="container">
+        <div class="row">
+            <!-- <input type="text" class="form-control" id="user">
+            <button class="btn btn-primary mt-2" id="addUser">Add User</button> -->
+            <input type="text" class="form-control" placeholder="Product Name" id="name">
+            <input type="text" class="form-control" placeholder="Product Price" id="price">
+            <input type="text" class="form-control" placeholder="Product Stock" id="stock">
+            <button class="btn btn-primary mt-2" id="addProduct">Add Product</button>
+        </div>
+        <p style="display: none; color: green;" id="successMessage">
+            <small>Product Added Successfully</small>
+        </p>
+        <ul id="productList">
+
+        </ul>
+    </div>
+    <script>
+        //Get Data 
+        fetch('http://localhost:3000/products')
+        .then(res => res.json())
+        .then(data => {
+            displayProducts(data);
+        });
+
+        const displayProducts = (data) => {
+            const productContainer = document.getElementById('productList');
+            for(let i = 0; i < data.length; i++){
+                const product = data[i];
+                appendProduct(product, productContainer);
+            }
+        }
+
+        const appendProduct = (product, productContainer) => {
+            const item = document.createElement('li');
+            item.innerText = `${product.name}: ${product.price}:available${product.stock}`;
+            productContainer.appendChild(item);
+        }
+
+        //Post data to the server
+        const btnAddProduct = document.getElementById('addProduct');
+        btnAddProduct.addEventListener('click', () => {
+            const name = document.getElementById('name').value;
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
+            const product = {name, price, stock};
+            console.log(product);
+            //POst
+            fetch('http://localhost:3000/addProduct', {
+                method: 'POST',
+                body: JSON.stringify(product),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                updateProduct(data);
+                //clean
+                document.getElementById('name').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('stock').value = '';
+                //Show Success Message 
+                const success = document.getElementById('successMessage')
+                success.style.display = 'block';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                }, 5000)
+
+            });
+        })
+
+        const updateProduct = (product) => {
+            const productContainer = document.getElementById('productList');
+            appendProduct(product, productContainer);
+            document.getElementById('userName').innerText = product.name;
+        }
+    </script>
+</body> 
+</html>
